@@ -1,0 +1,51 @@
+name: Gerar APK
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Organizar os arquivos nas pastas do Android
+        run: |
+          set -e
+          M=proj/app/src/main
+          mkdir -p $M/assets $M/java/br/com/judohiroshi $M/res/mipmap-xxxhdpi
+          for f in build*.gradle; do
+            if grep -q "apply false" "$f"; then cp "$f" proj/build.gradle; else cp "$f" proj/app/build.gradle; fi
+          done
+          cp settings.gradle gradle.properties proj/
+          cp AndroidManifest.xml $M/
+          cp MainActivity.java $M/java/br/com/judohiroshi/
+          cp index.html $M/assets/
+          cp manifest.json icon-192.png $M/assets/ 2>/dev/null || true
+          ICON=$(ls -S ic_launcher*.png | head -1)
+          cp "$ICON" $M/res/mipmap-xxxhdpi/ic_launcher.png
+          find proj -type f
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: android-actions/setup-android@v3
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: Compilar
+        working-directory: proj
+        run: gradle assembleRelease --no-daemon
+
+      - name: Renomear
+        run: cp proj/app/build/outputs/apk/release/app-release.apk JudoHiroshi.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: JudoHiroshi-apk
+          path: JudoHiroshi.apk
