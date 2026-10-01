@@ -1,0 +1,898 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<title>Judô Hiroshi</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=M+PLUS+Rounded+1c:wght@400;500;700;800&display=swap">
+<style>
+/* App Android em tela preta: barra superior com voltar, telas empilhadas, vermelho do hinomaru como destaque, a cor da faixa escolhida nos detalhes. */
+:root{
+  --bg:#000000;
+  --surface:#141416;
+  --surface-2:#1e1e22;
+  --ink:#f5f5f7;
+  --muted:#9a9aa3;
+  --line:#2a2a30;
+  --red:#ff3b4e;
+  --red-soft:#3a0f16;
+  --ok:#3ddc84;
+  --ok-soft:#0f2e1d;
+  --bad:#ff7a59;
+  --bad-soft:#3a1a10;
+  --display:"Dela Gothic One","Arial Black",Roboto,sans-serif;
+  --body:"M PLUS Rounded 1c",Roboto,"Segoe UI",system-ui,sans-serif;
+  --belt:#ffffff;
+  --tip:transparent;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font-family:var(--body);font-size:16px;line-height:1.45;min-height:100vh;overscroll-behavior-y:none}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--red);outline-offset:2px;border-radius:10px}
+input{font:inherit;color:inherit}
+
+/* Barra superior */
+.topbar{position:sticky;top:0;z-index:20;background:var(--bg);padding:calc(env(safe-area-inset-top,0px) + 8px) 8px 8px;display:flex;align-items:center;gap:6px;min-height:60px;border-bottom:1px solid transparent;transition:border-color .2s}
+.topbar.scrolled{border-bottom-color:var(--line)}
+.back{width:44px;height:44px;border-radius:50%;border:0;background:transparent;display:grid;place-items:center;flex:none}
+.back:active{background:var(--surface-2)}
+.back svg{width:24px;height:24px;stroke:var(--ink);stroke-width:2.4;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.topbar .t{flex:1;min-width:0}
+.topbar .t b{display:block;font-family:var(--display);font-weight:400;font-size:18px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar .t span{display:block;font-size:12px;color:var(--muted);font-weight:700;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar .mini-belt{width:34px;height:12px;border-radius:3px;flex:none;margin-right:8px;display:flex;overflow:hidden;border:1px solid #ffffff33}
+.topbar .mini-belt i{flex:1;background:var(--belt)}
+.topbar .mini-belt i+i{flex:none;width:30%;background:var(--tip)}
+
+.screen{max-width:560px;margin:0 auto;padding:4px 16px calc(32px + env(safe-area-inset-bottom,0px))}
+.screen.enter{animation:slide .22s ease-out}
+@keyframes slide{from{transform:translateX(18px);opacity:.4}to{transform:none;opacity:1}}
+
+/* Início */
+.hero{display:flex;flex-direction:column;align-items:center;text-align:center;padding:calc(env(safe-area-inset-top,0px) + 34px) 0 22px}
+.seal{width:86px;height:86px;border-radius:50%;background:var(--red);color:#fff;display:grid;place-items:center;font-family:var(--display);font-size:46px;line-height:1;box-shadow:0 0 0 8px #ff3b4e1f,0 10px 40px #ff3b4e55}
+.hero h1{margin:20px 0 0;font-family:var(--display);font-weight:400;font-size:34px;line-height:1;letter-spacing:.01em}
+.hero p{margin:8px 0 0;color:var(--muted);font-weight:500}
+.label{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:22px 4px 10px}
+
+.belt-list{display:grid;gap:10px}
+.belt-item{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px 14px 14px 16px}
+.belt-item:active{background:var(--surface-2)}
+.belt-item .txt{flex:1;min-width:0}
+.belt-item b{display:block;font-weight:800;font-size:16px}
+.belt-item small{display:block;color:var(--muted);font-size:13px;font-weight:500}
+.belt-item .chev{width:20px;height:20px;stroke:var(--muted);stroke-width:2.4;fill:none;flex:none}
+.belt-draw{flex:none;width:64px;height:20px;border-radius:4px;display:flex;overflow:hidden;border:1px solid #ffffff2e;position:relative}
+.belt-draw i{flex:1}
+.belt-draw i+i{flex:none;width:30%;border-left:1px solid #0000004d}
+.ring{flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--ok) calc(var(--p)*1%),var(--surface-2) 0)}
+.ring span{width:30px;height:30px;border-radius:50%;background:var(--surface);display:grid;place-items:center;font-size:10px;font-weight:800;font-variant-numeric:tabular-nums}
+
+/* Tela da faixa */
+.belt-hero{margin-top:6px;border-radius:22px;padding:20px 18px;background:radial-gradient(120% 90% at 100% 0%,color-mix(in srgb,var(--belt) 22%,transparent),transparent 60%),var(--surface);border:1px solid var(--line)}
+.belt-hero .kyu{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.belt-hero h2{margin:4px 0 14px;font-family:var(--display);font-weight:400;font-size:26px;line-height:1.1;text-wrap:balance}
+.belt-big{height:22px;border-radius:5px;display:flex;overflow:hidden;border:1px solid #ffffff2e}
+.belt-big i{flex:1;background:var(--belt)}
+.belt-big i+i{flex:none;width:18%;background:var(--tip);border-left:1px solid #0000004d}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
+.stat{background:var(--bg);border-radius:14px;padding:10px}
+.stat b{display:block;font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
+.stat span{font-size:12px;color:var(--muted);font-weight:500}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.action{display:flex;flex-direction:column;align-items:flex-start;gap:10px;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:16px;min-height:132px}
+.action:active{background:var(--surface-2)}
+.action .ic{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:var(--surface-2)}
+.action .ic svg{width:22px;height:22px;stroke:var(--ink);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.action b{font-weight:800;font-size:16px;line-height:1.2}
+.action small{color:var(--muted);font-size:13px;line-height:1.3}
+.action.main{grid-column:1/-1;flex-direction:row;align-items:center;min-height:0;background:var(--red);border-color:var(--red);color:#fff}
+.action.main .ic{background:#ffffff2a}
+.action.main .ic svg{stroke:#fff}
+.action.main small{color:#ffffffcc}
+.action.main div{flex:1}
+
+/* Listas */
+.block{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:4px 16px 8px;margin-bottom:12px}
+.block-h{display:flex;flex-wrap:wrap;gap:2px 10px;align-items:baseline;padding:12px 0 8px;border-bottom:1px solid var(--line)}
+.block-h b{font-family:var(--display);font-weight:400;font-size:16px;color:var(--red)}
+.block-h span{font-size:12px;color:var(--muted);font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.row{display:flex;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line);min-width:0;width:100%;background:none;border-left:0;border-right:0;border-top:0;text-align:left}
+.row:last-child{border-bottom:0}
+.row .txt{flex:1;min-width:0}
+.row .name{font-weight:800;letter-spacing:.01em;overflow-wrap:anywhere}
+.row .mean{color:var(--muted);font-size:14.5px;margin-top:1px}
+button.row:active{background:var(--surface-2)}
+.hide-ans .mean{color:transparent;background:var(--surface-2);border-radius:6px;user-select:none;width:fit-content;min-width:120px}
+.hide-ans .mean.show{color:var(--muted);background:transparent}
+.note{background:var(--surface-2);border-radius:12px;padding:10px 12px;margin:10px 0 4px;font-size:14.5px;font-weight:500}
+.arrow{color:var(--red);font-weight:800;padding:0 4px}
+.play{flex:none;width:38px;height:38px;border-radius:50%;background:var(--red);display:grid;place-items:center}
+.play svg{width:14px;height:14px;fill:#fff;margin-left:2px}
+.play.off{background:var(--surface-2)}
+.play.off svg{fill:var(--muted)}
+.done-dot{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center}
+.done-dot.on{background:var(--ok);border-color:var(--ok)}
+.done-dot svg{width:12px;height:12px;stroke:#000;stroke-width:3.4;fill:none}
+.done-dot:not(.on) svg{display:none}
+.toolbar-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:8px 2px 12px}
+.pill-btn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:9px 14px;font-size:14px;font-weight:700}
+.pill-btn[aria-pressed="true"]{border-color:var(--red);color:var(--red)}
+.progress-line{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar{flex:1;height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--red);border-radius:99px;transition:width .3s}
+.bar.ok i{background:var(--ok)}
+
+/* Botões */
+.btn{display:flex;justify-content:center;align-items:center;gap:8px;border:0;border-radius:16px;padding:15px 18px;font-weight:800;font-size:16px;text-decoration:none;width:100%}
+.btn.primary{background:var(--red);color:#fff}
+.btn.light{background:var(--ink);color:#000}
+.btn.ghost{background:var(--surface);border:1px solid var(--line)}
+.btn.ok{background:var(--ok);color:#000}
+.btn:disabled{opacity:.4}
+.btn:active{transform:scale(.98)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stack{display:grid;gap:10px}
+
+/* Vídeo */
+.player{position:relative;width:100%;max-width:100%;aspect-ratio:16/9;background:#0b0b0d;border-radius:18px;overflow:hidden;border:1px solid var(--line)}
+.player iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
+.player .empty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:18px;color:var(--muted);font-size:14px}
+.player .empty b{display:block;color:var(--ink);font-size:16px;margin-bottom:4px}
+.tech-title{margin:16px 0 4px}
+.tag{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--red);background:var(--red-soft);padding:5px 10px;border-radius:99px}
+.tech-title h2{margin:10px 0 2px;font-family:var(--display);font-weight:400;font-size:28px;line-height:1.1;overflow-wrap:anywhere;text-wrap:balance}
+.tech-title p{margin:0;color:var(--muted);font-size:14px}
+.know{display:flex;align-items:center;gap:12px;width:100%;margin:16px 0 12px;padding:14px 16px;border-radius:16px;border:1px solid var(--line);background:var(--surface);text-align:left;font-weight:800}
+.know .box{width:26px;height:26px;border-radius:8px;border:2px solid var(--muted);display:grid;place-items:center;flex:none}
+.know .box svg{width:14px;height:14px;stroke:#000;stroke-width:3.4;fill:none;display:none}
+.know[aria-pressed="true"]{border-color:var(--ok);background:var(--ok-soft)}
+.know[aria-pressed="true"] .box{background:var(--ok);border-color:var(--ok)}
+.know[aria-pressed="true"] .box svg{display:block}
+.link-form{margin-top:14px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px}
+.link-form label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin-bottom:8px}
+.link-form .in{display:flex;gap:8px}
+.link-form input{flex:1;min-width:0;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px;font-size:15px}
+.link-form button{flex:none;border:0;background:var(--ink);color:#000;border-radius:12px;padding:0 16px;font-weight:800}
+.link-form .err{color:var(--bad);font-size:13px;margin-top:6px}
+.link-form .row-links{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-size:13px}
+.text-btn{background:none;border:0;padding:4px 0;color:var(--muted);font-weight:700;text-decoration:underline;font-size:13px}
+.source{font-size:12px;color:var(--muted);margin-top:8px;text-align:center}
+
+/* Quiz */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:20px 18px}
+.panel h3{margin:0 0 6px;font-family:var(--display);font-weight:400;font-size:22px;text-wrap:balance}
+.panel .lead{margin:0 0 16px;color:var(--muted)}
+.seg{display:flex;gap:6px;background:var(--bg);padding:4px;border-radius:14px;margin-bottom:12px}
+.seg button{flex:1;border:0;background:transparent;border-radius:10px;padding:10px 6px;font-weight:700;font-size:14px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface-2);color:var(--ink)}
+.opt-label{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:14px 0 8px}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-top:1px solid var(--line);margin:14px 0 14px;font-weight:700;font-size:15px}
+.switch input{width:22px;height:22px;accent-color:var(--red)}
+.best{font-size:13px;color:var(--muted);text-align:center;margin-top:12px}
+.q-top{display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums;margin-bottom:8px}
+.q-kind{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--red);margin-top:18px}
+.q-text{font-family:var(--display);font-weight:400;font-size:23px;line-height:1.2;margin:8px 0 18px;text-wrap:balance;overflow-wrap:anywhere}
+.opts{display:grid;gap:10px}
+.opt{display:flex;align-items:center;gap:12px;text-align:left;width:100%;border:1.5px solid var(--line);background:var(--surface-2);border-radius:16px;padding:14px;font-weight:700;font-size:15.5px;overflow-wrap:anywhere}
+.opt .k{flex:none;width:28px;height:28px;border-radius:9px;background:var(--bg);display:grid;place-items:center;font-size:13px;font-weight:800;color:var(--muted)}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.right .k{background:var(--ok);color:#000}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt.wrong .k{background:var(--bad);color:#000}
+.feedback{margin-top:16px;display:grid;gap:10px}
+.feedback .msg{font-weight:800;font-size:16px}
+.feedback .msg.ok{color:var(--ok)}
+.feedback .msg.no{color:var(--bad)}
+.result{text-align:center}
+.score-ring{width:160px;height:160px;margin:6px auto 14px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--red) calc(var(--p)*1%),var(--surface-2) 0)}
+.score-ring div{width:126px;height:126px;border-radius:50%;background:var(--surface);display:grid;place-items:center;align-content:center}
+.score-ring b{font-family:var(--display);font-weight:400;font-size:36px;line-height:1;font-variant-numeric:tabular-nums}
+.score-ring span{font-size:12px;color:var(--muted);font-weight:700}
+.review{text-align:left;margin-top:18px}
+.review .mean b{color:var(--ok)}
+
+/* Treino */
+.drill-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:#000;font-weight:800;padding:12px 18px;border-radius:999px;font-size:14px;z-index:50;box-shadow:0 8px 30px #0008}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="topbar" id="topbar" hidden></header>
+<main class="screen" id="screen"></main>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const C = {
+  branca:"#ffffff", cinza:"#9a9a9a", azul:"#1f4fbf", amarela:"#f2cc0c",
+  laranja:"#ef7d12", verde:"#1e8a3c", roxa:"#6b2e8f", marrom:"#6b3e1f"
+};
+
+/*
+  Tipos de bloco:
+  terms  -> [termo, significado]
+  list   -> "TÉCNICA" ou ["TÉCNICA","descrição"]
+  combos -> [técnica A, técnica B]
+  note   -> texto
+  groups -> [{name, desc, items:[[termo,significado]]}]
+*/
+const NOTA_IMOB = "Todas as imobilizações dos programas anteriores.";
+const NOTA_ANT  = "As outras técnicas estão incluídas nos programas anteriores.";
+
+const faixas = [
+{
+  id:"branca-ponta-cinza", nome:"Faixa Branca Ponta Cinza", kyu:"Iniciante", cor:C.branca, ponta:C.cinza,
+  blocos:[
+    {jp:"Conhecimentos gerais", pt:"Perguntas", tipo:"terms", itens:[
+      ["O que significa judô","Caminho suave"],
+      ["Criador do judô","Jigoro Kano"],
+      ["Primeira escola de judô","Kodokan"]
+    ]},
+    {jp:"Terminologia", pt:"O que significa", tipo:"terms", itens:[
+      ["MATE","Parar"],
+      ["HAJIME","Começar"],
+      ["KUMI-KATA","Pegadas"],
+      ["RANDORI","Treino livre (luta)"],
+      ["RITSU-REI","Saudação em pé"],
+      ["ZA-REI","Saudação ajoelhada"],
+      ["UKEMI","Técnicas de amortecimento de quedas"]
+    ]},
+    {jp:"Ukemi", pt:"Técnicas de amortecimento de quedas", tipo:"note", itens:["Demonstrar cinco ukemis diferentes."]},
+    {jp:"Nage-waza", pt:"Técnicas de projeção", tipo:"list", itens:["O-SOTO-GARI"]},
+    {jp:"Osaekomi-waza", pt:"Técnicas de imobilização", tipo:"note", itens:["Demonstrar uma técnica de imobilização."]}
+  ]
+},
+{
+  id:"cinza", nome:"Faixa Cinza", kyu:"7º Kyu · Iniciante", cor:C.cinza,
+  blocos:[
+    {jp:"Fundamentos", pt:"Terminologia", tipo:"terms", itens:[
+      ["RITSU-REI","Saudação em pé"],
+      ["ZA-REI","Saudação ajoelhada"],
+      ["SHIZENTAI","Posição básica"],
+      ["KUMI-KATA","Pegadas"],
+      ["UKEMI","Técnicas de amortecimento de quedas"],
+      ["MATE","Parar"],
+      ["SOREMADE","Terminar"],
+      ["HAJIME","Começar"],
+      ["RANDORI","Treino livre (luta)"]
+    ]},
+    {jp:"Conhecimentos gerais", pt:"História e filosofia", tipo:"terms", single:true, itens:[
+      ["Significado da palavra judô","Caminho suave"],
+      ["Fundador do judô","Jigoro Kano"],
+      ["Primeira academia de judô","Kodokan"],
+      ["Uma das filosofias do judô","Ceder para vencer"]
+    ]},
+    {jp:"Nage-waza", pt:"Técnicas de projeção", tipo:"list", itens:["IPPON-SEOI-NAGE","KOSHI-GURUMA","O-SOTO-GARI"]},
+    {jp:"Osaekomi-waza", pt:"Técnicas de imobilização", tipo:"note", itens:["Demonstrar uma imobilização."]},
+    {jp:"Ukemi", pt:"Técnicas de amortecimento de quedas", tipo:"note", itens:["Demonstrar cinco formas de ukemi."]}
+  ]
+},
+{
+  id:"cinza-ponta-azul", nome:"Faixa Cinza Ponta Azul", kyu:"Intermediária", cor:C.cinza, ponta:C.azul,
+  blocos:[
+    {jp:"Fundamentos", pt:"Terminologia", tipo:"terms", itens:[
+      ["SHIZENTAI","Posição básica"],
+      ["JIGOTAI","Posição defensiva"],
+      ["KUMI-KATA","Pegadas"]
+    ]},
+    {jp:"Conhecimentos gerais", pt:"História e filosofia", tipo:"terms", single:true, itens:[
+      ["Significado da palavra judô","Caminho suave"],
+      ["Fundador do judô","Jigoro Kano"],
+      ["Local onde surgiu o judô","Tóquio, Japão, em 1882"],
+      ["Princípio fundamental do judô","Prosperidade e benefícios mútuos (Jita-kyoei)"]
+    ]},
+    {jp:"Ukemi", pt:"Formas de amortecimento de quedas", tipo:"terms", itens:[
+      ["MAE-UKEMI","Amortecimento para frente"],
+      ["USHIRO-UKEMI","Amortecimento para trás"],
+      ["YOKO-UKEMI","Amortecimento lateral"]
+    ]},
+    {jp:"Nage-waza", pt:"Técnicas de projeção", tipo:"list", itens:["IPPON-SEOI-NAGE","O-UCHI-GARI","O-GOSHI"]},
+    {jp:"Osaekomi-waza", pt:"Técnicas de imobilização", tipo:"list", itens:["HON-KESA-GATAME","YOKO-SHIHO-GATAME"]}
+  ]
+},
+{
+  id:"azul", nome:"Faixa Azul", kyu:"6º Kyu", cor:C.azul,
+  blocos:[
+    {jp:"Fundamentos", pt:"Terminologia", tipo:"terms", itens:[
+      ["RITSU-REI","Saudação em pé"],
+      ["ZA-REI","Saudação ajoelhada"],
+      ["JIGOTAI","Posição defensiva"],
+      ["SHIZENTAI","Posição básica"],
+      ["SHINTAI","Deslocamento do judoca sobre o dojô"],
+      ["SHISEI","Posturas"],
+      ["KUMI-KATA","Pegadas"],
+      ["UKEMI","Técnicas de amortecimento de quedas"],
+      ["MATE","Parar"],
+      ["SOREMADE","Terminar"],
+      ["HAJIME","Começar"],
+      ["NAGE-WAZA","Técnicas de projeção"],
+      ["NE-WAZA","Técnicas de solo"],
+      ["OSAEKOMI-WAZA","Técnicas de imobilização"],
+      ["SHIAI","Competição"],
+      ["SHIAIJO","Área de competição"],
+      ["RANDORI","Treino livre (luta)"]
+    ]},
+    {jp:"Shisei", pt:"Demonstrar as posturas", tipo:"groups", itens:[
+      {name:"Shizentai", desc:"Posição natural do judoca (postura fundamental)", items:[
+        ["SHIZEN-HONTAI","Frontal"],["MIGI-SHIZENTAI","Direita"],["HIDARI-SHIZENTAI","Esquerda"]]},
+      {name:"Jigotai", desc:"Posição de defesa do judoca (postura de defesa)", items:[
+        ["JIGO-HONTAI","Frontal"],["MIGI-JIGOTAI","Direita"],["HIDARI-JIGOTAI","Esquerda"]]}
+    ]},
+    {jp:"Nage-waza", pt:"Técnicas de projeção", tipo:"list", itens:["IPPON-SEOI-NAGE","KOSHI-GURUMA","O-SOTO-GARI"]},
+    {jp:"Osaekomi-waza", pt:"Técnicas de imobilização", tipo:"list", itens:["HON-KESA-GATAME","KAMI-SHIHO-GATAME","YOKO-SHIHO-GATAME"]}
+  ]
+},
+{
+  id:"azul-ponta-amarela", nome:"Faixa Azul Ponta Amarela", kyu:"Programa do exame", cor:C.azul, ponta:C.amarela,
+  blocos:[
+    {jp:"Fundamentos", pt:"Terminologia", tipo:"terms", itens:[
+      ["AYUMI-ASHI","Caminhada normal do judoca sobre o dojô"],
+      ["SURI-ASHI","Passos laterais arrastados"],
+      ["TAI-SABAKI","Movimentos de esquiva"],
+      ["SHIZEN-HONTAI","Posição fundamental em pé"],
+      ["KUZUSHI","Desequilíbrio"],
+      ["NAGE-WAZA","Técnicas de projeção"],
+      ["NE-WAZA","Técnicas de solo"],
+      ["OSAEKOMI-WAZA","Técnicas de imobilização"],
+      ["SHIAI","Competição"],
+      ["SHIAIJO","Área de competição"],
+      ["RANDORI","Treino livre (luta)"]
+    ]},
+    {jp:"Ukemi", pt:"Formas de amortecimento de quedas", tipo:"terms", itens:[
+      ["MAE-UKEMI","Frontal"],
+      ["USHIRO-UKEMI","Para trás"],
+      ["YOKO-UKEMI","Lateral"]
+    ]},
+    {jp:"Nage-waza", pt:"Técnicas de projeção", tipo:"list", cols:2, itens:[
+      ["MOROTE-SEOI-NAGE","Segura as duas golas"],
+      ["KO-UCHI-GARI","Puxa a perna por dentro"],
+      ["O-UCHI-GARI","Faz o gancho na perna"],
+      ["O-GOSHI","Abraça a cintura"],
+      ["TAI-OTOSHI","Fica de costas e coloca a perna no chão"]
+    ]},
+    {jp:"Osaekomi-waza", pt:"Técnicas de imobilização", tipo:"list", cols:2, itens:[
+      ["KUZURE-KESA-GATAME","Abraça o pescoço e coloca a mão por baixo do braço"],
+      ["KUZURE-YOKO-SHIHO-GATAME","Abraça o pescoço deitado lateralmente e segura a mão por baixo do braço"],
+      ["TATE-SHIHO-GATAME","Montado"]
+    ]}
+  ]
+},
+{
+  id:"amarela", nome:"Faixa Amarela", kyu:"5º Kyu", cor:C.amarela,
+  blocos:[
+    {jp:"Fundamentos", pt:"Terminologia", tipo:"terms", itens:[
+      ["AYUMI-ASHI","Caminhada normal do judoca sobre o dojô"],
+      ["SURI-ASHI","Passos laterais arrastados"],
+      ["TAI-SABAKI","Movimentos de esquiva"],
+      ["SONOMAMA","Comando: não se mexa"],
+      ["YOSHI","Comando: continuar"],
+      ["DOJO","Local onde se pratica judô"],
+      ["UWAGI","Blusa (casaco do judogi)"],
+      ["OBI","Faixa"],
+      ["SHITABAKI","Calça"],
+      ["UCHI-KOMI","Aperfeiçoamento de técnicas por repetição"],
+      ["AGURA","Sentado com as pernas cruzadas"],
+      ["SEIZA","Sentado sobre os calcanhares"],
+      ["SHIZEN-HONTAI","Posição fundamental em pé"],
+      ["KUZUSHI","Desequilíbrio"]
+    ]},
+    {jp:"Formas de treinamento", pt:"Do judô", tipo:"list", itens:["UCHI-KOMI","YAKUSOKU-GEIKO","RANDORI","KAKARI-GEIKO","SHIAI","TANDOKU-RENSHU"]},
+    {jp:"Ukemi", pt:"Formas de amortecimento de quedas", tipo:"terms", itens:[
+      ["MAE-UKEMI","Frontal"],
+      ["USHIRO-UKEMI","Para trás"],
+      ["YOKO-UKEMI","Lateral"]
+    ]},
+    {jp:"Kuzushi", pt:"Desequilíbrio", tipo:"terms", itens:[
+      ["MAE-KUZUSHI","Para frente"],
+      ["USHIRO-KUZUSHI","Para trás"],
+      ["YOKO-KUZUSHI","Lateral"],
+      ["MAE-SUMI-KUZUSHI","Para frente na diagonal"],
+      ["USHIRO-SUMI-KUZUSHI","Para trás na diagonal"]
+    ]},
+    {jp:"Nage-waza", pt:"Técnicas de projeção", tipo:"list", itens:["O-SOTO-GURUMA","MOROTE-SEOI-NAGE","KO-UCHI-GARI","O-UCHI-GARI","O-GOSHI","TAI-OTOSHI","TSURI-KOMI-GOSHI"]},
+    {jp:"Osaekomi-waza", pt:"Técnicas de imobilização", tipo:"list", itens:["KUZURE-KESA-GATAME","USHIRO-KESA-GATAME","TATE-SHIHO-GATAME"]}
+  ]
+},
+{
+  id:"laranja", nome:"Faixa Laranja", kyu:"4º Kyu", cor:C.laranja,
+  blocos:[
+    {jp:"Fundamentos", pt:"Terminologia", tipo:"terms", single:true, itens:[
+      ["KAKARI-GEIKO","Treinamento em que tori ataca e uke se defende"],
+      ["TANDOKU-RENSHU","Treinamento no vazio (sem parceiro)"],
+      ["YAKUSOKU-GEIKO","Treinamento de ataques sucessivos por ambos os judocas"],
+      ["TACHI-WAZA","Técnicas de projeção em pé"]
+    ]},
+    {jp:"Nage-waza", pt:"Técnicas de projeção", tipo:"list", itens:["SEOI-NAGE","ERI-SEOI-NAGE","SEOI-OTOSHI","HIZA-GURUMA","UCHI-MATA","DE-ASHI-BARAI","O-TSURI-GOSHI"]},
+    {jp:"Renraku-henka-waza", pt:"Técnicas combinadas", tipo:"combos", itens:[
+      ["UCHI-MATA","KO-UCHI-GARI"],["O-UCHI-GARI","TAI-OTOSHI"],["KO-UCHI-GARI","O-UCHI-GARI"],
+      ["O-UCHI-GARI","KO-UCHI-GARI"],["DE-ASHI-BARAI","TAI-OTOSHI"]
+    ]},
+    {jp:"Kaeshi-waza", pt:"Técnicas de contragolpe", tipo:"combos", legenda:"Ataque → contragolpe", itens:[
+      ["DE-ASHI-BARAI","DE-ASHI-BARAI"],["DE-ASHI-BARAI","KO-UCHI-GARI"],["UCHI-MATA","SUKUI-NAGE"],
+      ["O-SOTO-GARI","SUKUI-NAGE"],["UCHI-MATA","TAI-OTOSHI"],["O-SOTO-GARI","O-SOTO-GARI"],
+      ["TAI-OTOSHI","O-SOTO-GARI"],["KOSHI-GURUMA","USHIRO-GOSHI"]
+    ]},
+    {jp:"Osaekomi-waza", pt:"Técnicas de imobilização", tipo:"list", cols:2, itens:[
+      "KATA-GATAME","MAKURA-KESA-GATAME","USHIRO-KESA-GATAME","HON-KESA-GATAME","KAMI-SHIHO-GATAME",
+      "YOKO-SHIHO-GATAME","TATE-SHIHO-GATAME","KUZURE-KESA-GATAME","KUZURE-KAMI-SHIHO-GATAME","KUZURE-YOKO-SHIHO-GATAME"
+    ]}
+  ]
+},
+{
+  id:"verde", nome:"Faixa Verde", kyu:"3º Kyu", cor:C.verde,
+  blocos:[
+    {jp:"Classificação das técnicas", pt:"Terminologia", tipo:"terms", itens:[
+      ["SHIME-WAZA","Técnicas de estrangulamento"],
+      ["OSAEKOMI-WAZA","Técnicas de imobilização"],
+      ["KANSETSU-WAZA","Técnicas de torção"],
+      ["RENRAKU-HENKA-WAZA","Técnicas combinadas"],
+      ["ASHI-WAZA","Técnicas de pé ou pernas"],
+      ["KOSHI-WAZA","Técnicas de quadril"],
+      ["TE-WAZA","Técnicas de mão"],
+      ["KAESHI-WAZA","Técnicas de contragolpe"],
+      ["SUTEMI-WAZA","Técnicas de sacrifício"],
+      ["MA-SUTEMI-WAZA","Sacrifício caindo de costas"],
+      ["YOKO-SUTEMI-WAZA","Sacrifício para o lado"]
+    ]},
+    {jp:"Nage-waza", pt:"Técnicas de projeção", tipo:"list", cols:2, itens:["KO-SOTO-GAKE","TSURI-GOSHI","YOKO-OTOSHI","ASHI-GURUMA","KO-TSURI-GOSHI","HANE-GOSHI","HARAI-TSURI-KOMI-ASHI","TOMOE-NAGE"]},
+    {jp:"Kaeshi-waza", pt:"Técnicas de contragolpe", tipo:"combos", legenda:"Ataque → contragolpe", itens:[
+      ["SEOI-NAGE","TANI-OTOSHI"],["KOSHI-GURUMA","USHIRO-GOSHI"],
+      ["O-UCHI-GARI","SASAE-TSURI-KOMI-ASHI"],["UCHI-MATA","TANI-OTOSHI"]
+    ]},
+    {jp:"Renraku-henka-waza", pt:"Técnicas combinadas", tipo:"combos", itens:[
+      ["SEOI-NAGE","O-UCHI-GARI"],["KO-UCHI-GARI","O-SOTO-GARI"],["O-UCHI-GARI","HARAI-GOSHI"],
+      ["KO-UCHI-GARI","UCHI-MATA"],["SEOI-NAGE","KO-UCHI-GARI"]
+    ]},
+    {jp:"Osaekomi-waza", pt:"Técnicas de imobilização", tipo:"note", itens:[NOTA_IMOB]},
+    {jp:"Shime-waza", pt:"Técnicas de estrangulamento", tipo:"list", cols:2, itens:["NAMI-JUJI-JIME","GYAKU-JUJI-JIME","KATA-JUJI-JIME","RYOTE-JIME"]},
+    {jp:"Kansetsu-waza", pt:"Técnicas de torção (chaves de braço)", tipo:"list", itens:["UDE-GARAMI (1, 2 e 3)","UDE-GATAME","JUJI-GATAME"]}
+  ]
+},
+{
+  id:"roxa", nome:"Faixa Roxa", kyu:"2º Kyu", cor:C.roxa,
+  blocos:[
+    {jp:"Conhecimentos gerais", pt:"Divisões e arbitragem", tipo:"terms", single:true, itens:[
+      ["Divisão do tachi-waza","Te-waza, koshi-waza e ashi-waza"],
+      ["Divisão do shintai","Tsugi-ashi, ayumi-ashi e suri-ashi"],
+      ["Divisão das técnicas de projeção","Kuzushi, tsukuri e kake"],
+      ["FUSEN-GACHI","Vitória por ausência do adversário"],
+      ["HIKI-WAKE","Empate"],
+      ["SHIDO","Punição (falta)"],
+      ["HANSOKU-MAKE","Desclassificação"],
+      ["SOGO-GACHI","Vitória por combinação (waza-ari + waza-ari = ippon)"],
+      ["Pontuações","Koka, yuko, waza-ari e ippon"]
+    ]},
+    {jp:"Nage-waza", pt:"Técnicas de projeção", tipo:"list", cols:2, itens:["HARAI-TSURI-KOMI-ASHI","UKI-OTOSHI","O-SOTO-GARI","KO-UCHI-GAKE","UKI-WAZA","SUMI-GAESHI","SOTO-MAKIKOMI","UKI-GOSHI"]},
+    {jp:"Renraku-henka-waza", pt:"Técnicas combinadas", tipo:"combos", itens:[
+      ["IPPON-SEOI-NAGE","KO-UCHI-GAKE"],["KATA-GURUMA","KO-UCHI-GAKE"],["TSURI-KOMI-GOSHI","O-UCHI-GAKE"],
+      ["TSURI-KOMI-GOSHI","O-UCHI-GARI"],["KOSHI-GURUMA","SOTO-MAKIKOMI"],["O-UCHI-GARI","UKI-OTOSHI"],
+      ["DE-ASHI-BARAI","HARAI-GOSHI"]
+    ]},
+    {jp:"Kaeshi-waza", pt:"Técnicas de contragolpe", tipo:"combos", legenda:"Ataque → contragolpe", itens:[
+      ["HARAI-GOSHI","KO-SOTO-GARI"],["O-UCHI-GARI","UKI-WAZA"],
+      ["HANE-GOSHI","UTSURI-GOSHI"],["UCHI-MATA","KO-UCHI-GARI"]
+    ]},
+    {jp:"Osaekomi-waza", pt:"Técnicas de imobilização", tipo:"note", itens:[NOTA_IMOB]},
+    {jp:"Kansetsu-waza", pt:"Técnicas de torção (chaves de braço)", tipo:"list", itens:["HIZA-GATAME"], nota:NOTA_ANT},
+    {jp:"Shime-waza", pt:"Técnicas de estrangulamento", tipo:"list", itens:["RYOTE-JIME","SANKAKU-JIME","SODE-GURUMA-JIME"], nota:NOTA_ANT}
+  ]
+},
+{
+  id:"marrom", nome:"Faixa Marrom", kyu:"1º Kyu", cor:C.marrom,
+  blocos:[
+    {jp:"Conhecimentos gerais", pt:"Teoria", tipo:"note", itens:[
+      "Noções fundamentais sobre filosofia e histórico do judô.",
+      "Noções fundamentais sobre arbitragem."
+    ]},
+    {jp:"Nage-waza", pt:"Técnicas de projeção", tipo:"list", cols:2, itens:["OKURI-ASHI-BARAI","TANI-OTOSHI","HANE-MAKIKOMI","SUKUI-NAGE","O-GURUMA","URA-NAGE","YOKO-GURUMA","USHIRO-GOSHI"]},
+    {jp:"Renraku-henka-waza", pt:"Técnicas combinadas", tipo:"combos", nota:NOTA_ANT, itens:[
+      ["O-SOTO-GARI","O-SOTO-GURUMA"],["HANE-GOSHI","HARAI-GOSHI"],
+      ["HANE-GOSHI","HANE-MAKIKOMI"],["KATA-GURUMA","KIBISU-GAESHI"]
+    ]},
+    {jp:"Kaeshi-waza", pt:"Técnicas de contragolpe", tipo:"combos", legenda:"Ataque → contragolpe", nota:NOTA_ANT, itens:[
+      ["MOROTE-SEOI-NAGE","TAWARA-GAESHI"],["UKI-OTOSHI","TAI-OTOSHI"],["TOMOE-NAGE","KO-SOTO-GARI"],
+      ["KO-SOTO-GAKE","UCHI-MATA"],["HANE-GOSHI","TANI-OTOSHI"]
+    ]},
+    {jp:"Osaekomi-waza", pt:"Técnicas de imobilização", tipo:"note", itens:[NOTA_IMOB]},
+    {jp:"Kansetsu-waza", pt:"Técnicas de torção (chaves de braço)", tipo:"list", itens:["HARA-GATAME","WAKI-GATAME","ASHI-GARAMI"], nota:NOTA_ANT},
+    {jp:"Shime-waza", pt:"Técnicas de estrangulamento", tipo:"list", itens:["OKURI-ERI-JIME","KATAHA-JIME","TSUKKOMI-JIME","HADAKA-JIME","KOSHI-JIME"], nota:NOTA_ANT}
+  ]
+}
+];
+
+
+
+/* Vídeos oficiais do canal KODOKAN JUDO (youtube.com/@KODOKANJUDO) */
+const VIDEOS = {
+  "O-SOTO-GARI":"c-A_nP7mKAc","IPPON-SEOI-NAGE":"FQnOlCxo4oI","KOSHI-GURUMA":"SU7Id6uVJ44","O-UCHI-GARI":"0itJFhV9pDQ",
+  "O-GOSHI":"yhu1mfy2vJ4","HON-KESA-GATAME":"NDaQuJOFBYk","YOKO-SHIHO-GATAME":"TT7XJVSEQxA","KAMI-SHIHO-GATAME":"HFuMjOv0WN8",
+  "MOROTE-SEOI-NAGE":"zIq0xI0ogxk","SEOI-NAGE":"zIq0xI0ogxk","KO-UCHI-GARI":"3Jb3tZvr9Ng","TAI-OTOSHI":"4x6S3Q-Ktv8",
+  "KUZURE-KESA-GATAME":"Q2fb9jaoUFQ","TATE-SHIHO-GATAME":"55-rFmBx53g","O-SOTO-GURUMA":"92KbCm6pQeI","TSURI-KOMI-GOSHI":"McfzA0yRVt4",
+  "USHIRO-KESA-GATAME":"SBapox2M2dE","SEOI-OTOSHI":"vu1TMVNnq34","HIZA-GURUMA":"JPJx9-oAVns","UCHI-MATA":"iUpSu5J-bgw",
+  "DE-ASHI-BARAI":"4BUUvqxi_Kk","O-TSURI-GOSHI":"51Htlp7xEvE","KO-TSURI-GOSHI":"51Htlp7xEvE","TSURI-GOSHI":"51Htlp7xEvE",
+  "SUKUI-NAGE":"vU6aJ2kFxoI","USHIRO-GOSHI":"ORIYstuxYT8","KATA-GATAME":"zQR3IOXxO_Q","KUZURE-KAMI-SHIHO-GATAME":"YUrogQWdwiY",
+  "KO-SOTO-GAKE":"8b6kY4s4zH4","YOKO-OTOSHI":"MnNG67pF_a0","ASHI-GURUMA":"ROeayhvom9U","HANE-GOSHI":"M9_7De6A1kk",
+  "HARAI-TSURI-KOMI-ASHI":"gGPXvWL8VbE","TOMOE-NAGE":"880WbHvHv6A","TANI-OTOSHI":"3b9Me3Fohpk","SASAE-TSURI-KOMI-ASHI":"699i--pvYmE",
+  "HARAI-GOSHI":"qTo8HlAAkOo","NAMI-JUJI-JIME":"k2cHry9HByQ","GYAKU-JUJI-JIME":"t3tQriIPdlI","KATA-JUJI-JIME":"3VZVUAmiMD8",
+  "RYOTE-JIME":"-RHC4V7TQiY","UDE-GARAMI":"AIlTvZb4RlE","UDE-GATAME":"SBf0aTma1VI","JUJI-GATAME":"OWgSOlCuMXw",
+  "UKI-OTOSHI":"6H5tmncOY4Q","UKI-WAZA":"weVOpJ63gII","SUMI-GAESHI":"5VhduA5xkbA","SOTO-MAKIKOMI":"bWG9O1BVKtQ",
+  "UKI-GOSHI":"bPKwtB4lyOQ","KATA-GURUMA":"cnHRhSy8yi4","KO-SOTO-GARI":"jeQ541ScLB4","UTSURI-GOSHI":"4pQd_bEnlf0",
+  "HIZA-GATAME":"H2HtAJdiJcE","SANKAKU-JIME":"lq1CUBRAm7s","SODE-GURUMA-JIME":"E3nvQzClcAU","OKURI-ASHI-BARAI":"nw1ZdRjrdRI",
+  "HANE-MAKIKOMI":"6CRBGLGz9j8","O-GURUMA":"SnZciTAY9vc","URA-NAGE":"Fgi9b8DJ5sQ","YOKO-GURUMA":"MehP6I5cY2c",
+  "KIBISU-GAESHI":"tJylJYfBliA","TAWARA-GAESHI":"TmTWgrmViZc","HARA-GATAME":"ZzEycg8R_9M","WAKI-GATAME":"8F5p1zuJRG0",
+  "ASHI-GARAMI":"BWWb0GoAtZw","OKURI-ERI-JIME":"EiqyoVcIAi8","KATAHA-JIME":"yaTGgRjnwB8","TSUKKOMI-JIME":"dKKpnD3eLcY",
+  "HADAKA-JIME":"9f0n8jez7iA"
+};
+
+/* ---------- Utilidades ---------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const shuffle = a => { a = a.slice(); for (let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+const store = {
+  get(k,d){ try{ const v = localStorage.getItem("jh-"+k); return v==null?d:JSON.parse(v); }catch(e){ return d; } },
+  set(k,v){ try{ localStorage.setItem("jh-"+k, JSON.stringify(v)); }catch(e){} }
+};
+const clean = n => n.replace(/\s*\(.*?\)\s*/g,"").trim();
+const isTermLabel = s => /^[A-Z0-9][A-Z0-9\- ]+$/.test(s);
+let known = store.get("known", {});
+let customVideos = store.get("videos", {});
+const videoId = n => customVideos[clean(n)] || VIDEOS[clean(n)] || null;
+function parseYouTube(url){
+  const s = String(url).trim();
+  const m = s.match(/(?:youtu\.be\/|[?&]v=|\/embed\/|\/shorts\/|\/live\/)([A-Za-z0-9_-]{11})/);
+  if (m) return m[1];
+  if (/^[A-Za-z0-9_-]{11}$/.test(s)) return s;
+  return null;
+}
+const ICON = {
+  back:'<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>',
+  chev:'<svg class="chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>',
+  play:'<svg viewBox="0 0 12 12"><path d="M2 1l9 5-9 5z"/></svg>',
+  check:'<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  book:'<svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/><path d="M9 8h6"/></svg>',
+  quiz:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6"/><path d="M12 17.5h.01"/></svg>',
+  video:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10 9.5v5l4.5-2.5z"/></svg>',
+  drill:'<svg viewBox="0 0 24 24"><path d="M13 3L4 14h7l-1 7 9-11h-7z"/></svg>'
+};
+function toast(msg){ const t=$("toast"); t.textContent=msg; t.hidden=false; clearTimeout(toast.h); toast.h=setTimeout(()=>t.hidden=true,1800); }
+
+/* ---------- Dados ---------- */
+const GROUP_LABEL = {
+  "Nage-waza":"Nage-waza (projeção)","Osaekomi-waza":"Osaekomi-waza (imobilização)",
+  "Shime-waza":"Shime-waza (estrangulamento)","Kansetsu-waza":"Kansetsu-waza (torção)",
+  "Ukemi":"Ukemi (amortecimento de quedas)"
+};
+const ALL_GROUPS = Object.keys(GROUP_LABEL);
+function termsOf(f){
+  const out=[];
+  f.blocos.forEach(b=>{
+    if (b.tipo==="terms") b.itens.forEach(([q,a])=>out.push({q,a,kind:isTermLabel(q)?"termo":"geral"}));
+    if (b.tipo==="groups") b.itens.forEach(g=>g.items.forEach(([q,a])=>out.push({q,a:`${g.name} ${a.toLowerCase()}`,kind:"termo"})));
+  });
+  return out;
+}
+function techsOf(f){
+  const out=[], seen=new Set();
+  const add=(name,group)=>{ const k=clean(name); if(seen.has(k))return; seen.add(k); out.push({name,group}); };
+  f.blocos.forEach(b=>{
+    if (b.tipo==="list" && b.jp!=="Formas de treinamento") b.itens.forEach(t=>add(Array.isArray(t)?t[0]:t,b.jp));
+    if (b.tipo==="terms" && b.jp==="Ukemi") b.itens.forEach(([n])=>add(n,"Ukemi"));
+    if (b.tipo==="combos") b.itens.forEach(([a,c])=>{add(a,b.jp);add(c,b.jp);});
+  });
+  return out;
+}
+const ALL_TERMS = faixas.flatMap(termsOf);
+const beltById = id => faixas.find(f=>f.id===id) || faixas[0];
+const beltDraw = f => `<span class="belt-draw"><i style="background:${f.cor}"></i>${f.ponta?`<i style="background:${f.ponta}"></i>`:""}</span>`;
+function setBeltColors(f){
+  document.documentElement.style.setProperty("--belt", f.cor);
+  document.documentElement.style.setProperty("--tip", f.ponta || f.cor);
+}
+const doneCount = f => techsOf(f).filter(t=>known[clean(t.name)]).length;
+
+/* ---------- Navegação (botão voltar do app e do Android) ---------- */
+let current = {s:"home"};
+function go(s, p={}){ current = {s, ...p}; history.pushState(current, ""); render(true); }
+function back(){ if (history.state && history.state.s !== "home") history.back(); else { current={s:"home"}; render(); } }
+window.addEventListener("popstate", e=>{ current = e.state || {s:"home"}; render(true); });
+
+function topbar(title, sub, f){
+  const tb = $("topbar");
+  tb.hidden = false;
+  tb.innerHTML = `<button class="back" type="button" data-act="back" aria-label="Voltar">${ICON.back}</button>
+    <div class="t"><b>${esc(title)}</b>${sub?`<span>${esc(sub)}</span>`:""}</div>
+    ${f?`<span class="mini-belt" aria-hidden="true"><i></i>${f.ponta?"<i></i>":""}</span>`:""}`;
+}
+
+/* ---------- Telas ---------- */
+const screens = {
+  home(){
+    $("topbar").hidden = true;
+    return `<div class="hero"><div class="seal" aria-hidden="true">柔</div><h1>Judô Hiroshi</h1><p>Estudo para exame de faixa</p></div>
+    <div class="label">Escolha a sua faixa</div>
+    <div class="belt-list">${faixas.map(f=>{
+      const n = techsOf(f).length, d = doneCount(f), p = n?Math.round(d/n*100):0;
+      return `<button class="belt-item" type="button" data-act="belt" data-id="${f.id}">
+        ${beltDraw(f)}
+        <span class="txt"><b>${esc(f.nome.replace("Faixa ",""))}</b><small>${esc(f.kyu)} · ${n} técnica${n===1?"":"s"}</small></span>
+        <span class="ring" style="--p:${p}" aria-label="${p}% das técnicas dominadas"><span>${p}%</span></span>
+        ${ICON.chev}
+      </button>`;}).join("")}</div>`;
+  },
+  belt(){
+    const f = beltById(current.id); setBeltColors(f);
+    topbar(f.nome, "Escolher outra faixa", f);
+    const techs = techsOf(f), best = store.get("best-"+f.id, null);
+    return `<section class="belt-hero">
+      <div class="kyu">${esc(f.kyu)}</div><h2>${esc(f.nome)}</h2>
+      <div class="belt-big"><i></i>${f.ponta?"<i></i>":""}</div>
+      <div class="stats">
+        <div class="stat"><b>${buildQuestions([f]).length}</b><span>perguntas</span></div>
+        <div class="stat"><b>${doneCount(f)}/${techs.length}</b><span>técnicas dominadas</span></div>
+        <div class="stat"><b>${best==null?"–":best+"%"}</b><span>melhor quiz</span></div>
+      </div>
+    </section>
+    <div class="actions">
+      <button class="action main" type="button" data-act="quiz-start-screen"><span class="ic">${ICON.quiz}</span><div><b>Fazer o quiz</b><br><small>Perguntas de múltipla escolha</small></div></button>
+      <button class="action" type="button" data-act="nav" data-s="estudar"><span class="ic">${ICON.book}</span><b>Estudar o programa</b><small>Termos e respostas</small></button>
+      <button class="action" type="button" data-act="nav" data-s="tecnicas"><span class="ic">${ICON.video}</span><b>Técnicas e vídeos</b><small>Demonstração da Kodokan</small></button>
+      <button class="action" type="button" data-act="drill-start" style="grid-column:1/-1;min-height:0;flex-direction:row;align-items:center"><span class="ic">${ICON.drill}</span><div style="flex:1"><b>Treino de demonstração</b><br><small>Uma técnica por vez, com o vídeo</small></div></button>
+    </div>`;
+  },
+  estudar(){
+    const f = beltById(current.id); setBeltColors(f);
+    topbar("Estudar", f.nome, f);
+    const hide = !!current.hide;
+    let h = `<div class="toolbar-row"><span class="progress-line">Toque nas respostas para revelar</span><button class="pill-btn" type="button" data-act="toggle-hide" aria-pressed="${hide}">${hide?"Mostrar":"Esconder"} respostas</button></div><div class="${hide?"hide-ans":""}">`;
+    f.blocos.forEach(b=>{
+      h += `<div class="block"><div class="block-h"><b>${esc(b.jp)}</b><span>${esc(b.pt)}</span></div>`;
+      const techRow = (n, d) => `<button class="row" type="button" data-act="video" data-name="${esc(n)}"><span class="txt"><span class="name">${esc(n)}</span>${d?`<span class="mean" style="display:block">${esc(d)}</span>`:""}</span><span class="play${videoId(n)?"":" off"}">${ICON.play}</span></button>`;
+      if (b.tipo==="terms") b.itens.forEach(([q,a])=>{
+        h += b.jp==="Ukemi" ? techRow(q,a) : `<div class="row"><div class="txt"><div class="name">${esc(q)}</div><div class="mean">${esc(a)}</div></div></div>`;
+      });
+      else if (b.tipo==="groups") b.itens.forEach(g=>{
+        h += `<div class="note"><b>${esc(g.name)}</b>: ${esc(g.desc)}</div>`;
+        g.items.forEach(([q,a])=>h += `<div class="row"><div class="txt"><div class="name">${esc(q)}</div><div class="mean">${esc(a)}</div></div></div>`);
+      });
+      else if (b.tipo==="list") b.itens.forEach(t=>{
+        const [n,d] = Array.isArray(t)?t:[t,""];
+        h += b.jp==="Formas de treinamento" ? `<div class="row"><div class="txt"><div class="name">${esc(n)}</div></div></div>` : techRow(n,d);
+      });
+      else if (b.tipo==="combos"){
+        if (b.legenda) h += `<div class="note">${esc(b.legenda)}</div>`;
+        b.itens.forEach(([a,c])=>h += `<div class="row"><div class="txt"><div class="name">${esc(a)}<span class="arrow">→</span>${esc(c)}</div></div></div>`);
+      }
+      else if (b.tipo==="note") b.itens.forEach(t=>h += `<div class="note">${esc(t)}</div>`);
+      if (b.nota) h += `<div class="note">${esc(b.nota)}</div>`;
+      h += `</div>`;
+    });
+    return h + `</div>`;
+  },
+  tecnicas(){
+    const f = beltById(current.id); setBeltColors(f);
+    topbar("Técnicas e vídeos", f.nome, f);
+    const techs = techsOf(f), d = doneCount(f);
+    const groups = {};
+    techs.forEach(t=>(groups[t.group] ||= []).push(t));
+    let h = `<div class="progress-line" style="margin:6px 2px 14px"><div class="bar ok"><i style="width:${techs.length?d/techs.length*100:0}%"></i></div><span>${d}/${techs.length} dominadas</span></div>
+      <button class="btn primary" type="button" data-act="drill-start" style="margin-bottom:14px">${ICON.drill.replace('<svg','<svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2"')} Treino de demonstração</button>`;
+    Object.entries(groups).forEach(([g,list])=>{
+      const blk = f.blocos.find(b=>b.jp===g);
+      h += `<div class="block"><div class="block-h"><b>${esc(g)}</b><span>${esc(blk?blk.pt:"")}</span></div>`;
+      list.forEach(t=>{
+        const on = !!known[clean(t.name)];
+        h += `<button class="row" type="button" data-act="video" data-name="${esc(t.name)}"><span class="done-dot${on?" on":""}">${ICON.check}</span><span class="txt"><span class="name">${esc(t.name)}</span></span><span class="play${videoId(t.name)?"":" off"}">${ICON.play}</span></button>`;
+      });
+      f.blocos.filter(b=>b.jp===g && b.nota).forEach(b=>h += `<div class="note">${esc(b.nota)}</div>`);
+      h += `</div>`;
+    });
+    const notes = f.blocos.filter(b=>b.tipo==="note" && b.jp!=="Conhecimentos gerais");
+    if (notes.length){
+      h += `<div class="block"><div class="block-h"><b>Também no exame</b><span>Demonstrações</span></div>`;
+      notes.forEach(b=>b.itens.forEach(t=>h += `<div class="note"><b>${esc(b.jp)}:</b> ${esc(t)}</div>`));
+      h += `</div>`;
+    }
+    return h;
+  },
+  video(){
+    const f = beltById(current.id); setBeltColors(f);
+    let list = techsOf(f), idx = list.findIndex(t=>clean(t.name)===clean(current.name));
+    if (idx < 0) {
+      const found = faixas.flatMap(techsOf).find(t=>clean(t.name)===clean(current.name));
+      list = [found || {name:current.name, group:""}]; idx = 0;
+    }
+    const t = list[idx];
+    topbar(t.name, f.nome, f);
+    return techView(t, {list, idx, mode:"video"});
+  },
+  drill(){
+    const f = beltById(current.id); setBeltColors(f);
+    const d = drillState;
+    if (!d || d.belt !== f.id) { startDrill(f, false); }
+    const st = drillState;
+    topbar("Treino de demonstração", f.nome, f);
+    const t = st.list[st.i];
+    if (!t) return `<div class="panel result"><span class="tag">Fim do treino</span>
+      <h3 style="margin-top:14px;font-size:34px">${st.ok} de ${st.list.length}</h3>
+      <p class="lead">técnicas que você já sabe demonstrar nesta rodada.</p>
+      <div class="stack"><button class="btn primary" type="button" data-act="drill-again">Treinar de novo</button>
+      <button class="btn ghost" type="button" data-act="back">Voltar para a faixa</button></div></div>`;
+    return `<div class="drill-head"><span class="tag">${st.i+1} de ${st.list.length}</span><span class="progress-line" style="flex:1;margin-left:12px"><span class="bar"><i style="width:${st.i/st.list.length*100}%"></i></span></span></div>`
+      + techView(t, {mode:"drill"});
+  },
+  quizSetup(){
+    const f = beltById(current.id); setBeltColors(f);
+    topbar("Quiz", f.nome, f);
+    const best = store.get("best-"+f.id, null), cnt = store.get("qcount", 10), cum = store.get("qcumul", false);
+    return `<div class="panel">
+      <h3>Pronto para o exame?</h3>
+      <p class="lead">Terminologia, conhecimentos gerais e grupos das técnicas, com quatro alternativas cada.</p>
+      <div class="opt-label">Quantidade de perguntas</div>
+      <div class="seg" role="group" aria-label="Quantidade">${[10,20,"all"].map(n=>`<button type="button" data-act="qcount" data-n="${n}" aria-pressed="${cnt==n}">${n==="all"?"Todas":n}</button>`).join("")}</div>
+      <label class="switch" for="q-cumul">Incluir faixas anteriores<input type="checkbox" id="q-cumul" ${cum?"checked":""}></label>
+      <button class="btn primary" type="button" data-act="quiz-go">Começar quiz</button>
+      <div class="best">${best==null?"Você ainda não fez o quiz desta faixa.":`Seu melhor resultado nesta faixa: ${best}%`}</div>
+    </div>`;
+  },
+  quiz(){
+    const f = beltById(current.id); setBeltColors(f);
+    const z = quizState;
+    if (!z) { current = {s:"quizSetup", id:f.id}; history.replaceState(current,""); return screens.quizSetup(); }
+    topbar("Quiz", f.nome, f);
+    if (z.i >= z.qs.length) {
+      const pct = Math.round(z.score/z.qs.length*100);
+      if (!z.saved){ const k="best-"+f.id, prev=store.get(k,null); if(prev==null||pct>prev) store.set(k,pct); z.saved=true; }
+      const msg = pct===100?"Ippon! Gabaritou.":pct>=80?"Waza-ari! Muito bem.":pct>=50?"Bom caminho. Revise os erros.":"Continue treinando. Osu!";
+      return `<div class="panel result">
+        <div class="score-ring" style="--p:${pct}"><div><b>${z.score}/${z.qs.length}</b><span>${pct}% de acertos</span></div></div>
+        <h3>${msg}</h3>
+        <div class="stack" style="margin-top:16px">
+          ${z.misses.length?`<button class="btn primary" type="button" data-act="quiz-miss">Refazer só os erros (${z.misses.length})</button>`:""}
+          <button class="btn ${z.misses.length?"ghost":"primary"}" type="button" data-act="quiz-go">Novo quiz</button>
+          <button class="btn ghost" type="button" data-act="back">Voltar para a faixa</button>
+        </div>
+        ${z.misses.length?`<div class="review"><div class="opt-label">Respostas certas</div>${z.misses.map(m=>m.tech
+          ? `<button class="row" type="button" data-act="video" data-name="${esc(m.tech)}"><span class="txt"><span class="name">${esc(m.prompt)}</span><span class="mean" style="display:block"><b>${esc(m.answer)}</b></span></span><span class="play${videoId(m.tech)?"":" off"}">${ICON.play}</span></button>`
+          : `<div class="row"><div class="txt"><div class="name">${esc(m.prompt)}</div><div class="mean"><b>${esc(m.answer)}</b></div></div></div>`).join("")}</div>`:""}
+      </div>`;
+    }
+    const q = z.qs[z.i], a = z.answered;
+    return `<div class="panel">
+      <div class="q-top"><span>Pergunta ${z.i+1} de ${z.qs.length}</span><span>${z.score} acerto${z.score===1?"":"s"}</span></div>
+      <div class="bar"><i style="width:${z.i/z.qs.length*100}%"></i></div>
+      <div class="q-kind">${esc(q.kind)}</div>
+      <div class="q-text">${esc(q.prompt)}</div>
+      <div class="opts">${q.options.map((o,k)=>{
+        let c=""; if (a!=null){ if(o===q.answer)c="right"; else if(o===a)c="wrong"; }
+        return `<button class="opt ${c}" type="button" data-act="answer" data-k="${k}" ${a!=null?"disabled":""}><span class="k">${"ABCD"[k]}</span><span>${esc(o)}</span></button>`;
+      }).join("")}</div>
+      ${a!=null?`<div class="feedback"><span class="msg ${a===q.answer?"ok":"no"}">${a===q.answer?"✓ Certo!":"✗ Resposta certa: "+esc(q.answer)}</span>
+        ${q.tech?`<button class="btn ghost" type="button" data-act="video" data-name="${esc(q.tech)}">${ICON.play.replace('<svg','<svg width="14" height="14" fill="currentColor"')} Ver a técnica</button>`:""}
+        <button class="btn light" type="button" data-act="next">${z.i+1<z.qs.length?"Próxima":"Ver resultado"}</button></div>`:""}
+    </div>`;
+  }
+};
+
+/* Tela de técnica com player */
+function techView(t, o){
+  const id = videoId(t.name), on = !!known[clean(t.name)];
+  const custom = !!customVideos[clean(t.name)];
+  const player = id
+    ? `<div class="player"><iframe src="https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1&playsinline=1" title="${esc(t.name)}" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>`
+    : `<div class="player"><div class="empty"><div><b>Vídeo ainda não cadastrado</b>Cole abaixo o link do vídeo desta técnica no YouTube.</div></div></div>`;
+  let h = player + `<div class="tech-title"><span class="tag">${esc(GROUP_LABEL[t.group]||t.group||"Técnica")}</span><h2>${esc(t.name)}</h2>
+    <p>${id?(custom?"Vídeo escolhido por você":"Demonstração oficial da Kodokan"):"Sem vídeo da Kodokan para esta técnica"}</p></div>`;
+  if (o.mode==="drill"){
+    h += `<p class="lead" style="color:var(--muted);margin:12px 0">Demonstre a técnica. Se tiver dúvida, assista ao vídeo antes.</p>
+      <div class="two"><button class="btn ghost" type="button" data-act="drill-no">Preciso treinar</button><button class="btn ok" type="button" data-act="drill-yes">Sei demonstrar</button></div>`;
+  } else {
+    h += `<button class="know" type="button" data-act="know" data-name="${esc(t.name)}" aria-pressed="${on}"><span class="box">${ICON.check}</span>Já sei demonstrar esta técnica</button>`;
+    const prev = o.list[o.idx-1], next = o.list[o.idx+1];
+    h += `<div class="two"><button class="btn ghost" type="button" data-act="video-swap" data-name="${prev?esc(prev.name):""}" ${prev?"":"disabled"}>‹ Anterior</button><button class="btn ghost" type="button" data-act="video-swap" data-name="${next?esc(next.name):""}" ${next?"":"disabled"}>Próxima ›</button></div>`;
+  }
+  h += `<div class="link-form" id="link-form" ${id&&!current.editLink?"hidden":""}>
+      <label for="link-in">${id?"Trocar o vídeo desta técnica":"Link do vídeo no YouTube"}</label>
+      <div class="in"><input id="link-in" type="url" inputmode="url" placeholder="https://youtu.be/..." autocomplete="off"><button type="button" data-act="save-link" data-name="${esc(t.name)}">Salvar</button></div>
+      <div class="err" id="link-err" hidden>Esse link não parece ser de um vídeo do YouTube.</div>
+      ${custom?`<div class="row-links"><button class="text-btn" type="button" data-act="reset-link" data-name="${esc(t.name)}">Voltar para o vídeo da Kodokan</button></div>`:""}
+    </div>
+    ${id?`<div class="source"><button class="text-btn" type="button" data-act="edit-link">Trocar vídeo</button></div>`:""}`;
+  return h;
+}
+
+/* ---------- Quiz ---------- */
+function pick(correct, pool, n=3){ const c=correct.toLowerCase(); return shuffle([...new Set(pool.filter(p=>p.toLowerCase()!==c))]).slice(0,n); }
+function buildQuestions(list){
+  const terms = list.flatMap(termsOf), techs = list.flatMap(techsOf).filter(t=>ALL_GROUPS.includes(t.group));
+  const tA = ALL_TERMS.filter(t=>t.kind==="termo").map(t=>t.a), tQ = ALL_TERMS.filter(t=>t.kind==="termo").map(t=>t.q), gA = ALL_TERMS.filter(t=>t.kind==="geral").map(t=>t.a);
+  const qs=[], seen=new Set(), push=q=>{ if(seen.has(q.prompt))return; seen.add(q.prompt); qs.push(q); };
+  terms.forEach(t=>{
+    if (t.kind==="geral") push({kind:"Conhecimentos gerais",prompt:t.q.replace(/\?$/,"")+"?",answer:t.a,options:shuffle([t.a,...pick(t.a,gA)])});
+    else if (Math.random()<.65) push({kind:"Terminologia",prompt:`O que significa ${t.q}?`,answer:t.a,options:shuffle([t.a,...pick(t.a,tA)])});
+    else push({kind:"Terminologia",prompt:`Qual termo significa “${t.a}”?`,answer:t.q,options:shuffle([t.q,...pick(t.q,tQ)])});
+  });
+  techs.forEach(t=>{ const ans=GROUP_LABEL[t.group];
+    push({kind:"Técnicas",prompt:`${clean(t.name)} é uma técnica de…`,answer:ans,tech:t.name,options:shuffle([ans,...shuffle(ALL_GROUPS.filter(g=>g!==t.group)).slice(0,3).map(g=>GROUP_LABEL[g])])}); });
+  return shuffle(qs);
+}
+let quizState = null;
+function startQuiz(f, only){
+  const cum = store.get("qcumul", false), cnt = store.get("qcount", 10);
+  const idx = faixas.indexOf(f);
+  let qs = only || buildQuestions(cum ? faixas.slice(0, idx+1) : [f]);
+  if (!only && cnt !== "all") qs = qs.slice(0, cnt);
+  quizState = {qs, i:0, score:0, answered:null, misses:[]};
+}
+
+/* ---------- Treino ---------- */
+let drillState = null;
+function startDrill(f){
+  const techs = techsOf(f);
+  drillState = {belt:f.id, list:[...shuffle(techs.filter(t=>!known[clean(t.name)])), ...shuffle(techs.filter(t=>known[clean(t.name)]))], i:0, ok:0};
+}
+
+/* ---------- Render ---------- */
+function render(animate){
+  const fn = screens[current.s] || screens.home;
+  const el = $("screen");
+  el.innerHTML = fn();
+  if (animate){ el.classList.remove("enter"); void el.offsetWidth; el.classList.add("enter"); }
+  window.scrollTo(0,0);
+}
+window.addEventListener("scroll", ()=>$("topbar").classList.toggle("scrolled", window.scrollY>4), {passive:true});
+
+document.addEventListener("click", e=>{
+  const b = e.target.closest("[data-act]");
+  const mean = e.target.closest(".hide-ans .mean");
+  if (mean && !b){ mean.classList.toggle("show"); return; }
+  if (!b) return;
+  const act = b.dataset.act, f = beltById(current.id);
+  switch(act){
+    case "back": back(); break;
+    case "belt": go("belt", {id:b.dataset.id}); break;
+    case "nav": go(b.dataset.s, {id:f.id}); break;
+    case "toggle-hide": current.hide = !current.hide; history.replaceState(current,""); render(); break;
+    case "video": go("video", {id:f.id, name:b.dataset.name}); break;
+    case "video-swap": current = {s:"video", id:f.id, name:b.dataset.name}; history.replaceState(current,""); render(true); break;
+    case "know": { const k=clean(b.dataset.name); if(known[k]) delete known[k]; else known[k]=true; store.set("known",known);
+      b.setAttribute("aria-pressed", !!known[k]); toast(known[k]?"Marcada como dominada":"Marcação removida"); break; }
+    case "edit-link": $("link-form").hidden=false; $("link-in").focus(); break;
+    case "save-link": { const id = parseYouTube($("link-in").value);
+      if(!id){ $("link-err").hidden=false; return; }
+      customVideos[clean(b.dataset.name)] = id; store.set("videos", customVideos); toast("Vídeo salvo"); render(); break; }
+    case "reset-link": delete customVideos[clean(b.dataset.name)]; store.set("videos", customVideos); toast("Vídeo da Kodokan restaurado"); render(); break;
+    case "quiz-start-screen": go("quizSetup", {id:f.id}); break;
+    case "qcount": store.set("qcount", b.dataset.n==="all"?"all":Number(b.dataset.n)); render(); break;
+    case "quiz-go": startQuiz(f); if (current.s==="quiz"){ render(true); } else go("quiz", {id:f.id}); break;
+    case "quiz-miss": startQuiz(f, shuffle(quizState.misses).map(m=>({...m, options:shuffle(m.options)}))); render(true); break;
+    case "answer": { const z=quizState, q=z.qs[z.i], c=q.options[Number(b.dataset.k)];
+      if (z.answered!=null) return; z.answered=c; if(c===q.answer) z.score++; else z.misses.push(q);
+      if (navigator.vibrate) try{ navigator.vibrate(c===q.answer?20:[30,40,30]); }catch(err){}
+      render(); break; }
+    case "next": quizState.i++; quizState.answered=null; render(true); break;
+    case "drill-start": startDrill(f); go("drill", {id:f.id}); break;
+    case "drill-again": startDrill(f); render(true); break;
+    case "drill-yes": case "drill-no": { const st=drillState, t=st.list[st.i], k=clean(t.name);
+      if (act==="drill-yes"){ known[k]=true; st.ok++; } else delete known[k];
+      store.set("known", known); st.i++; render(true); break; }
+  }
+});
+document.addEventListener("change", e=>{ if (e.target.id==="q-cumul") store.set("qcumul", e.target.checked); });
+document.addEventListener("keydown", e=>{ if (e.key==="Enter" && e.target.id==="link-in"){ const s=document.querySelector('[data-act="save-link"]'); if(s) s.click(); } });
+
+history.replaceState({s:"home"}, "");
+render();
+</script>
+</body>
+</html>
